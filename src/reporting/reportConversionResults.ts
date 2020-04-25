@@ -1,10 +1,10 @@
 import chalk from "chalk";
 import { EOL } from "os";
 
-import { Logger } from "../adapters/logger";
+import { logger, Logger } from "../adapters/logger";
+import { Inject } from "../inject";
 import { RuleConversionResults } from "../rules/convertRules";
 import { ESLintRuleOptions, TSLintRuleOptions } from "../rules/types";
-import { ReportConversionResultsDependencies } from "./dependencies";
 import {
     logFailedConversions,
     logMissingConversionTarget,
@@ -13,16 +13,16 @@ import {
 } from "./reportOutputs";
 
 export const reportConversionResults = (
-    dependencies: ReportConversionResultsDependencies,
+    inject: Inject,
     ruleConversionResults: RuleConversionResults,
 ) => {
     if (ruleConversionResults.converted.size !== 0) {
-        logSuccessfulConversions("rule", ruleConversionResults.converted, dependencies.logger);
-        logNotices(ruleConversionResults.converted, dependencies.logger);
+        logSuccessfulConversions("rule", ruleConversionResults.converted, inject(logger));
+        logNotices(ruleConversionResults.converted, inject(logger));
     }
 
     if (ruleConversionResults.failed.length !== 0) {
-        logFailedConversions(ruleConversionResults.failed, dependencies.logger);
+        logFailedConversions(ruleConversionResults.failed, inject(logger));
     }
 
     if (ruleConversionResults.missing.length !== 0) {
@@ -31,7 +31,7 @@ export const reportConversionResults = (
             (setting: TSLintRuleOptions) =>
                 `tslint-to-eslint-config does not know the ESLint equivalent for TSLint's "${setting.ruleName}"${EOL}`,
             ruleConversionResults.missing,
-            dependencies.logger,
+            inject(logger),
             [
                 ruleConversionResults.missing.length === 1
                     ? "defaulting to eslint-plugin-tslint for it."
@@ -41,7 +41,7 @@ export const reportConversionResults = (
     }
 
     if (ruleConversionResults.plugins.size !== 0) {
-        logMissingPlugins(ruleConversionResults.plugins, dependencies.logger);
+        logMissingPlugins(ruleConversionResults.plugins, inject(logger));
     }
 };
 

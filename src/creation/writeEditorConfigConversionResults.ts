@@ -1,15 +1,12 @@
-import { FileSystem } from "../adapters/fileSystem";
+import { fileSystem } from "../adapters/fileSystem";
 import { EditorSettingConversionResults } from "../editorSettings/convertEditorSettings";
+import { Inject } from "../inject";
 import { EditorConfiguration } from "../input/editorConfiguration";
 import { DeepPartial } from "../input/findReportedConfiguration";
 import { formatOutput } from "./formatting/formatOutput";
 
-export type WriteConversionResultsDependencies = {
-    fileSystem: Pick<FileSystem, "writeFile">;
-};
-
 export const writeConversionResults = async (
-    dependencies: WriteConversionResultsDependencies,
+    inject: Inject,
     outputPath: string,
     conversionResults: EditorSettingConversionResults,
     originalConfiguration: DeepPartial<EditorConfiguration>,
@@ -19,7 +16,7 @@ export const writeConversionResults = async (
         ...formatConvertedSettings(conversionResults),
     };
 
-    return await dependencies.fileSystem.writeFile(outputPath, formatOutput(outputPath, output));
+    return await inject(fileSystem).writeFile(outputPath, formatOutput(outputPath, output));
 };
 
 export const formatConvertedSettings = (conversionResults: EditorSettingConversionResults) => {

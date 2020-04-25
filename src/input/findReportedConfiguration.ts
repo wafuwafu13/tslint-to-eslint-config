@@ -4,10 +4,6 @@ export type DeepPartial<T> = {
     [P in keyof T]: T[P] extends {} ? DeepPartial<T[P]> : T[P];
 };
 
-export type FindReportedConfigurationDependencies = {
-    exec: Exec;
-};
-
 export const findReportedConfiguration = async <Configuration>(
     exec: Exec,
     command: string,

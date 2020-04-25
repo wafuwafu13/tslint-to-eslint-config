@@ -1,14 +1,11 @@
 import { ConversionError } from "../errors/conversionError";
 import { ErrorSummary } from "../errors/errorSummary";
+import { Inject } from "../inject";
 import { convertEditorSetting } from "./convertEditorSetting";
-import { EditorSettingConverter } from "./converter";
 import { EditorSetting } from "./types";
+import { editorSettingsConverters } from "./editorSettingsConverters";
 
 const EDITOR_SETTINGS_PREFIX = "editor.";
-
-export type ConvertEditorSettingsDependencies = {
-    converters: Map<string, EditorSettingConverter>;
-};
 
 export type EditorSettingConversionResults = {
     converted: Map<string, EditorSetting>;
@@ -20,7 +17,7 @@ export type EditorSettingConversionResults = {
 export type EditorConfiguration = Record<string, any>;
 
 export const convertEditorSettings = (
-    dependencies: ConvertEditorSettingsDependencies,
+    inject: Inject,
     rawEditorConfiguration: EditorConfiguration,
 ): EditorSettingConversionResults => {
     const converted = new Map<string, EditorSetting>();
@@ -35,7 +32,7 @@ export const convertEditorSettings = (
         }
 
         const editorSetting = { editorSettingName: configurationName, value };
-        const conversion = convertEditorSetting(editorSetting, dependencies.converters);
+        const conversion = convertEditorSetting(editorSetting, inject(editorSettingsConverters));
 
         if (conversion === undefined) {
             const { editorSettingName } = editorSetting;

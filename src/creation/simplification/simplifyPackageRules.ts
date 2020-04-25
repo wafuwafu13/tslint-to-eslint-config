@@ -1,4 +1,4 @@
-import { SansDependencies } from "../../binding";
+import { Inject } from "../../inject";
 import { ESLintConfiguration } from "../../input/findESLintConfiguration";
 import { OriginalConfigurations } from "../../input/findOriginalConfigurations";
 import { TSLintConfiguration } from "../../input/findTSLintConfiguration";
@@ -7,11 +7,6 @@ import { uniqueFromSources } from "../../utils";
 import { collectTSLintRulesets } from "./collectTSLintRulesets";
 import { removeExtendsDuplicatedRules } from "./removeExtendsDuplicatedRules";
 import { retrieveExtendsValues } from "./retrieveExtendsValues";
-
-export type SimplifyPackageRulesDependencies = {
-    removeExtendsDuplicatedRules: typeof removeExtendsDuplicatedRules;
-    retrieveExtendsValues: SansDependencies<typeof retrieveExtendsValues>;
-};
 
 export type SimplifiedRuleConversionResults = Pick<
     RuleConversionResults,
@@ -25,7 +20,7 @@ export type SimplifiedRuleConversionResults = Pick<
  * determines which ESLint rulesets to extend from and removes redundant rule values.
  */
 export const simplifyPackageRules = async (
-    dependencies: SimplifyPackageRulesDependencies,
+    inject: Inject,
     eslint: Pick<OriginalConfigurations<ESLintConfiguration>, "full"> | undefined,
     tslint: OriginalConfigurations<Pick<TSLintConfiguration, "extends">>,
     ruleConversionResults: SimplifiedRuleConversionResults,
@@ -37,11 +32,11 @@ export const simplifyPackageRules = async (
         return ruleConversionResults;
     }
 
-    const { configurationErrors, importedExtensions } = await dependencies.retrieveExtendsValues(
+    const { configurationErrors, importedExtensions } = await inject(retrieveExtendsValues)(
         uniqueFromSources(extendedESLintRulesets, extendedTSLintRulesets),
     );
 
-    const converted = dependencies.removeExtendsDuplicatedRules(
+    const converted = inject(removeExtendsDuplicatedRules)(
         ruleConversionResults.converted,
         importedExtensions,
     );

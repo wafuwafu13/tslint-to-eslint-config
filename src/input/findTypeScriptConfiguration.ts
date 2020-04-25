@@ -1,7 +1,6 @@
-import {
-    findReportedConfiguration,
-    FindReportedConfigurationDependencies,
-} from "./findReportedConfiguration";
+import { exec } from "../adapters/exec";
+import { Inject } from "../inject";
+import { findReportedConfiguration } from "./findReportedConfiguration";
 
 export type TypeScriptConfiguration = {
     compilerOptions: {
@@ -17,11 +16,11 @@ const defaultTypeScriptConfiguration = {
 };
 
 export const findTypeScriptConfiguration = async (
-    dependencies: FindReportedConfigurationDependencies,
+    inject: Inject,
     config: string | undefined,
 ): Promise<TypeScriptConfiguration | Error> => {
     const rawConfiguration = await findReportedConfiguration<TypeScriptConfiguration>(
-        dependencies.exec,
+        inject(exec),
         "tsc --showConfig -p",
         config ?? "./tsconfig.json",
     );

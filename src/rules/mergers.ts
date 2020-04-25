@@ -6,7 +6,7 @@ import { mergeNoEval } from "./mergers/no-eval";
 import { mergeNoMemberDelimiterStyle } from "./mergers/member-delimiter-style";
 import { mergeNoUnnecessaryTypeAssertion } from "./mergers/no-unnecessary-type-assertion";
 
-export const mergers = new Map([
+export const ruleMergers = new Map([
     ["@typescript-eslint/ban-types", mergeBanTypes],
     ["@typescript-eslint/consistent-type-assertions", mergeConsistentTypeAssertions],
     ["@typescript-eslint/indent", mergeIndent],

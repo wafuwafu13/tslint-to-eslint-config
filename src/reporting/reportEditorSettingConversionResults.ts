@@ -1,8 +1,9 @@
 import { EOL } from "os";
 
+import { logger } from "../adapters/logger";
 import { EditorSettingConversionResults } from "../editorSettings/convertEditorSettings";
 import { EditorSetting } from "../editorSettings/types";
-import { ReportConversionResultsDependencies } from "./dependencies";
+import { Inject } from "../inject";
 import {
     logFailedConversions,
     logMissingConversionTarget,
@@ -10,19 +11,19 @@ import {
 } from "./reportOutputs";
 
 export const reportEditorSettingConversionResults = (
-    dependencies: ReportConversionResultsDependencies,
+    inject: Inject,
     editorSettingConversionResults: EditorSettingConversionResults,
 ) => {
     if (editorSettingConversionResults.converted.size !== 0) {
         logSuccessfulConversions(
             "editor setting",
             editorSettingConversionResults.converted,
-            dependencies.logger,
+            inject(logger),
         );
     }
 
     if (editorSettingConversionResults.failed.length !== 0) {
-        logFailedConversions(editorSettingConversionResults.failed, dependencies.logger);
+        logFailedConversions(editorSettingConversionResults.failed, inject(logger));
     }
 
     if (editorSettingConversionResults.missing.length !== 0) {
@@ -34,7 +35,7 @@ export const reportEditorSettingConversionResults = (
             "editor setting",
             missingEditorSettingOutputMapping,
             editorSettingConversionResults.missing,
-            dependencies.logger,
+            inject(logger),
         );
     }
 };

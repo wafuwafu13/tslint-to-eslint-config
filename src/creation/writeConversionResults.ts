@@ -1,17 +1,14 @@
-import { FileSystem } from "../adapters/fileSystem";
-import { RuleConversionResults } from "../rules/convertRules";
+import { Inject } from "../inject";
+import { fileSystem } from "../adapters/fileSystem";
 import { AllOriginalConfigurations } from "../input/findOriginalConfigurations";
+import { RuleConversionResults } from "../rules/convertRules";
 import { createEnv } from "./eslint/createEnv";
 import { formatConvertedRules } from "./formatConvertedRules";
 import { formatOutput } from "./formatting/formatOutput";
 import { SimplifiedRuleConversionResults } from "./simplification/simplifyPackageRules";
 
-export type WriteConversionResultsDependencies = {
-    fileSystem: Pick<FileSystem, "writeFile">;
-};
-
 export const writeConversionResults = async (
-    dependencies: WriteConversionResultsDependencies,
+    inject: Inject,
     outputPath: string,
     ruleConversionResults: RuleConversionResults & SimplifiedRuleConversionResults,
     originalConfigurations: AllOriginalConfigurations,
@@ -40,5 +37,5 @@ export const writeConversionResults = async (
         },
     };
 
-    return await dependencies.fileSystem.writeFile(outputPath, formatOutput(outputPath, output));
+    return await inject(fileSystem).writeFile(outputPath, formatOutput(outputPath, output));
 };

@@ -1,25 +1,18 @@
-import { SansDependencies } from "../binding";
 import { writeConversionResults } from "../creation/writeEditorConfigConversionResults";
 import { convertEditorSettings } from "../editorSettings/convertEditorSettings";
 import { findEditorConfiguration } from "../input/findEditorConfiguration";
 import { reportEditorSettingConversionResults } from "../reporting/reportEditorSettingConversionResults";
 import { ResultStatus, ResultWithStatus, TSLintToESLintSettings } from "../types";
-
-export type ConvertEditorConfigDependencies = {
-    convertEditorSettings: SansDependencies<typeof convertEditorSettings>;
-    findEditorConfiguration: SansDependencies<typeof findEditorConfiguration>;
-    reportConversionResults: SansDependencies<typeof reportEditorSettingConversionResults>;
-    writeConversionResults: SansDependencies<typeof writeConversionResults>;
-};
+import { Inject } from "../inject";
 
 /**
  * Root-level driver to convert an editor configuration.
  */
 export const convertEditorConfig = async (
-    dependencies: ConvertEditorConfigDependencies,
+    inject: Inject,
     settings: TSLintToESLintSettings,
 ): Promise<ResultWithStatus> => {
-    const conversion = await dependencies.findEditorConfiguration(settings.editor);
+    const conversion = await inject(findEditorConfiguration)(settings.editor);
     if (conversion === undefined) {
         return {
             status: ResultStatus.Succeeded,
@@ -33,9 +26,9 @@ export const convertEditorConfig = async (
         };
     }
 
-    const settingConversionResults = dependencies.convertEditorSettings(conversion.result);
+    const settingConversionResults = inject(convertEditorSettings)(conversion.result);
 
-    const fileWriteError = await dependencies.writeConversionResults(
+    const fileWriteError = await inject(writeConversionResults)(
         conversion.configPath,
         settingConversionResults,
         conversion.result,
@@ -47,7 +40,7 @@ export const convertEditorConfig = async (
         };
     }
 
-    dependencies.reportConversionResults(settingConversionResults);
+    inject(reportEditorSettingConversionResults)(settingConversionResults);
 
     return {
         status: ResultStatus.Succeeded,

@@ -1,12 +1,8 @@
-import { SansDependencies } from "../../binding";
+import { Inject } from "../../inject";
 import { ConfigurationError } from "../../errors/configurationError";
 import { ESLintConfiguration } from "../../input/findESLintConfiguration";
 import { importer } from "../../input/importer";
 import { resolveExtensionNames } from "./resolveExtensionNames";
-
-export type RetrieveExtendsValuesDependencies = {
-    importer: SansDependencies<typeof importer>;
-};
 
 export type RetrievedExtensionValues = {
     configurationErrors: ConfigurationError[];
@@ -37,7 +33,7 @@ const typescriptPluginExtensions = new Map([
  * Imports any extended ESLint rulesets as ESLint configurations.
  */
 export const retrieveExtendsValues = async (
-    dependencies: RetrieveExtendsValuesDependencies,
+    inject: Inject,
     rawExtensionNames: string | string[],
 ): Promise<RetrievedExtensionValues> => {
     const importedExtensions: Partial<ESLintConfiguration>[] = [];
@@ -49,14 +45,14 @@ export const retrieveExtendsValues = async (
             const builtInExtension = builtInExtensions.get(extensionName);
             if (builtInExtension !== undefined) {
                 importedExtensions.push(
-                    (await dependencies.importer(builtInExtension)) as ESLintConfiguration,
+                    (await inject(importer)(builtInExtension)) as ESLintConfiguration,
                 );
                 return;
             }
 
             const typescriptPluginExtension = typescriptPluginExtensions.get(extensionName);
             if (typescriptPluginExtension !== undefined) {
-                const importedTypeScriptPlugin = (await dependencies.importer(
+                const importedTypeScriptPlugin = (await inject(importer)(
                     typescriptPluginExtension,
                 )) as ESLintConfiguration;
                 importedExtensions.push({
@@ -65,7 +61,7 @@ export const retrieveExtendsValues = async (
                 return;
             }
 
-            const imported = await dependencies.importer(extensionName);
+            const imported = await inject(importer)(extensionName);
 
             if (imported instanceof Error) {
                 configurationErrors.push(

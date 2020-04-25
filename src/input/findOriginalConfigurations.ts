@@ -1,21 +1,13 @@
-import { SansDependencies } from "../binding";
 import { ResultStatus, TSLintToESLintSettings, ResultWithDataStatus } from "../types";
-import { findESLintConfiguration, ESLintConfiguration } from "./findESLintConfiguration";
-import { PackagesConfiguration, findPackagesConfiguration } from "./findPackagesConfiguration";
+import { ESLintConfiguration, findESLintConfiguration } from "./findESLintConfiguration";
+import { findPackagesConfiguration, PackagesConfiguration } from "./findPackagesConfiguration";
 import {
     findTypeScriptConfiguration,
     TypeScriptConfiguration,
 } from "./findTypeScriptConfiguration";
 import { findTSLintConfiguration, TSLintConfiguration } from "./findTSLintConfiguration";
+import { Inject } from "../inject";
 import { mergeLintConfigurations } from "./mergeLintConfigurations";
-
-export type FindOriginalConfigurationsDependencies = {
-    findESLintConfiguration: SansDependencies<typeof findESLintConfiguration>;
-    findPackagesConfiguration: SansDependencies<typeof findPackagesConfiguration>;
-    findTypeScriptConfiguration: SansDependencies<typeof findTypeScriptConfiguration>;
-    findTSLintConfiguration: SansDependencies<typeof findTSLintConfiguration>;
-    mergeLintConfigurations: typeof mergeLintConfigurations;
-};
 
 /**
  * Both found configurations for a particular linter.
@@ -40,15 +32,15 @@ export type AllOriginalConfigurations = {
 };
 
 export const findOriginalConfigurations = async (
-    dependencies: FindOriginalConfigurationsDependencies,
+    inject: Inject,
     rawSettings: TSLintToESLintSettings,
 ): Promise<ResultWithDataStatus<AllOriginalConfigurations>> => {
     // Simultaneously search for all required configuration types
     const [eslint, packages, tslint, typescript] = await Promise.all([
-        dependencies.findESLintConfiguration(rawSettings),
-        dependencies.findPackagesConfiguration(rawSettings.package),
-        dependencies.findTSLintConfiguration(rawSettings.tslint),
-        dependencies.findTypeScriptConfiguration(rawSettings.typescript),
+        inject(findESLintConfiguration)(rawSettings),
+        inject(findPackagesConfiguration)(rawSettings.package),
+        inject(findTSLintConfiguration)(rawSettings.tslint),
+        inject(findTypeScriptConfiguration)(rawSettings.typescript),
     ]);
 
     // Out of those configurations, only TSLint's is always required to run
@@ -76,7 +68,7 @@ export const findOriginalConfigurations = async (
         data: {
             ...(!(eslint instanceof Error) && { eslint }),
             ...(!(packages instanceof Error) && { packages }),
-            tslint: dependencies.mergeLintConfigurations(eslint, tslint),
+            tslint: inject(mergeLintConfigurations)(eslint, tslint),
             ...(!(typescript instanceof Error) && { typescript }),
         },
         status: ResultStatus.Succeeded,

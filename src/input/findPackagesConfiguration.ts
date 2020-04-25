@@ -1,7 +1,6 @@
-import {
-    findReportedConfiguration,
-    FindReportedConfigurationDependencies,
-} from "./findReportedConfiguration";
+import { exec } from "../adapters/exec";
+import { Inject } from "../inject";
+import { findReportedConfiguration } from "./findReportedConfiguration";
 
 export type PackagesConfiguration = {
     dependencies: {
@@ -18,11 +17,11 @@ const defaultPackagesConfiguration = {
 };
 
 export const findPackagesConfiguration = async (
-    dependencies: FindReportedConfigurationDependencies,
+    inject: Inject,
     config: string | undefined,
 ): Promise<PackagesConfiguration | Error> => {
     const rawConfiguration = await findReportedConfiguration<PackagesConfiguration>(
-        dependencies.exec,
+        inject(exec),
         "cat",
         config ?? "./package.json",
     );

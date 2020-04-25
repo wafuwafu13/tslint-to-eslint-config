@@ -1,31 +1,24 @@
 import * as path from "path";
 import stripJsonComments from "strip-json-comments";
 
-import { FileSystem } from "../adapters/fileSystem";
-import { NativeImporter } from "../adapters/nativeImporter";
+import { fileSystem } from "../adapters/fileSystem";
+import { getCwd } from "../adapters/getCwd";
+import { nativeImporter } from "../adapters/nativeImporter";
+import { Inject } from "../inject";
 
-export type ImporterDependencies = {
-    fileSystem: Pick<FileSystem, "fileExists" | "readFile">;
-    getCwd: () => string;
-    nativeImporter: NativeImporter;
-};
-
-export const importer = async (
-    dependencies: ImporterDependencies,
-    moduleName: string,
-): Promise<any | Error> => {
-    const pathAttempts = [path.join(dependencies.getCwd(), moduleName), moduleName];
+export const importer = async (inject: Inject, moduleName: string): Promise<any | Error> => {
+    const pathAttempts = [path.join(inject(getCwd)(), moduleName), moduleName];
 
     const importFile = async (filePath: string) => {
         if (!filePath.endsWith(".json")) {
-            return await dependencies.nativeImporter(filePath);
+            return await inject(nativeImporter)(filePath);
         }
 
-        if (!(await dependencies.fileSystem.fileExists(filePath))) {
+        if (!(await inject(fileSystem).fileExists(filePath))) {
             return undefined;
         }
 
-        const rawJsonContents = await dependencies.fileSystem.readFile(filePath);
+        const rawJsonContents = await inject(fileSystem).readFile(filePath);
         if (rawJsonContents instanceof Error) {
             return rawJsonContents;
         }

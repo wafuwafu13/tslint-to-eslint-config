@@ -1,17 +1,13 @@
 import { ConversionError } from "../errors/conversionError";
 import { ErrorSummary } from "../errors/errorSummary";
+import { Inject } from "../inject";
 import { TSLintConfigurationRules } from "../input/findTSLintConfiguration";
-import { RuleConverter } from "./converter";
 import { convertRule } from "./convertRule";
 import { convertTSLintRuleSeverity } from "./convertRuleSeverity";
 import { formatRawTslintRule } from "./formatRawTslintRule";
-import { RuleMerger } from "./merger";
 import { TSLintRuleOptions, ESLintRuleOptions } from "./types";
-
-export type ConvertRulesDependencies = {
-    converters: Map<string, RuleConverter>;
-    mergers: Map<string, RuleMerger>;
-};
+import { rulesConverters } from "./rulesConverters";
+import { ruleMergers } from "./mergers";
 
 export type RuleConversionResults = {
     converted: Map<string, ESLintRuleOptions>;
@@ -21,7 +17,7 @@ export type RuleConversionResults = {
 };
 
 export const convertRules = (
-    dependencies: ConvertRulesDependencies,
+    inject: Inject,
     rawTslintRules: TSLintConfigurationRules,
 ): RuleConversionResults => {
     const converted = new Map<string, ESLintRuleOptions>();
@@ -31,7 +27,7 @@ export const convertRules = (
 
     for (const [ruleName, value] of Object.entries(rawTslintRules)) {
         const tslintRule = formatRawTslintRule(ruleName, value);
-        const conversion = convertRule(tslintRule, dependencies.converters);
+        const conversion = convertRule(tslintRule, inject(rulesConverters));
 
         if (conversion === undefined) {
             if (tslintRule.ruleSeverity !== "off") {
@@ -58,7 +54,7 @@ export const convertRules = (
                 continue;
             }
 
-            const merger = dependencies.mergers.get(changes.ruleName);
+            const merger = inject(ruleMergers).get(changes.ruleName);
             if (merger === undefined) {
                 failed.push(ConversionError.forMerger(changes.ruleName));
             } else {

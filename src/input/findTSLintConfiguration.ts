@@ -1,8 +1,8 @@
+import { exec } from "../adapters/exec";
+import { Inject } from "../inject";
+import { uniqueFromSources } from "../utils";
 import { findRawConfiguration } from "./findRawConfiguration";
 import { findReportedConfiguration } from "./findReportedConfiguration";
-import { Exec } from "../adapters/exec";
-import { SansDependencies } from "../binding";
-import { uniqueFromSources } from "../utils";
 import { importer } from "./importer";
 
 export type TSLintConfiguration = {
@@ -13,20 +13,12 @@ export type TSLintConfiguration = {
 
 export type TSLintConfigurationRules = Record<string, any>;
 
-export type FindTSLintConfigurationDependencies = {
-    exec: Exec;
-    importer: SansDependencies<typeof importer>;
-};
-
-export const findTSLintConfiguration = async (
-    dependencies: FindTSLintConfigurationDependencies,
-    config: string | undefined,
-) => {
+export const findTSLintConfiguration = async (inject: Inject, config: string | undefined) => {
     const filePath = config ?? "./tslint.json";
     const [rawConfiguration, reportedConfiguration] = await Promise.all([
-        findRawConfiguration<Partial<TSLintConfiguration>>(dependencies.importer, filePath),
+        findRawConfiguration<Partial<TSLintConfiguration>>(inject(importer), filePath),
         findReportedConfiguration<TSLintConfiguration>(
-            dependencies.exec,
+            inject(exec),
             "tslint --print-config",
             filePath,
         ),
