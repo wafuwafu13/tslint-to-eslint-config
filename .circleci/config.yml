@@ -71,7 +71,10 @@ jobs:
             - attach_workspace:
                   at: "."
 
-            - run: npm run prettier -- --check
+            # - run: npm run prettier -- --check
+            - run: npm run prettier -- --write
+            - run: git add -A
+            - run: git status
 
     test:
         docker:
