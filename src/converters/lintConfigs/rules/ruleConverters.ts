@@ -1,4 +1,4 @@
-import { convertAdjacentOverloadSignatures } from "./ruleConverters/adjacent-overload-signatures";
+import  {    convertAdjacentOverloadSignatures      } from "./ruleConverters/adjacent-overload-signatures";
 import { convertAlign } from "./ruleConverters/align";
 import { convertArrayType } from "./ruleConverters/array-type";
 import { convertArrowParens } from "./ruleConverters/arrow-parens";
@@ -6,7 +6,7 @@ import { convertArrowReturnShorthand } from "./ruleConverters/arrow-return-short
 import { convertAwaitPromise } from "./ruleConverters/await-promise";
 import { convertBanCommaOperator } from "./ruleConverters/ban-comma-operator";
 import { convertBanTsIgnore } from "./ruleConverters/ban-ts-ignore";
-import { convertBanTypes } from "./ruleConverters/ban-types";
+import {  convertBanTypes } from "./ruleConverters/ban-types";
 import { convertBinaryExpressionOperandOrder } from "./ruleConverters/binary-expression-operand-order";
 import { convertCallableTypes } from "./ruleConverters/callable-types";
 import { convertClassName } from "./ruleConverters/class-name";
