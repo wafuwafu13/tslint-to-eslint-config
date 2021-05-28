@@ -75,6 +75,7 @@ jobs:
             - run: npm run prettier -- --write
             - run: git add -A
             - run: git status
+            - run: git diff HEAD
 
     test:
         docker:
