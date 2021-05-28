@@ -73,8 +73,7 @@ jobs:
 
             # - run: npm run prettier -- --check
             - run: npm run prettier -- --write
-            - run: git add -A
-            - run: git checkout -- package-lock.json
+            - run: git add src/
             - run: git status
             - run: git diff HEAD
 
